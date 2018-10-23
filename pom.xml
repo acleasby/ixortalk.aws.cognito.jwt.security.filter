@@ -27,7 +27,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ixortalk</groupId>
+    <groupId>com.infinio</groupId>
     <artifactId>ixortalk.aws.cognito.jwt.security.filter</artifactId>
     <version>0.0.8-SNAPSHOT</version>
 
@@ -88,14 +88,16 @@
     </scm>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>infinio-repository</id>
+            <name>Internal Releases</name>
+            <url>https://nexus.infinio.com/content/repositories/releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>infinio-repository</id>
+            <name>Internal Releases</name>
+            <url>https://nexus.infinio.com/content/repositories/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>

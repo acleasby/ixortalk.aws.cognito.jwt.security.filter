@@ -24,8 +24,8 @@
 package com.ixortalk.aws.cognito.boot.filter;
 
 import com.ixortalk.aws.cognito.boot.JwtAuthentication;
-import com.ixortalk.aws.cognito.boot.config.JwtIdTokenCredentialsHolder;
 import com.ixortalk.aws.cognito.boot.config.JwtConfiguration;
+import com.ixortalk.aws.cognito.boot.config.JwtIdTokenCredentialsHolder;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import org.apache.commons.logging.Log;
@@ -37,6 +37,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,7 +61,12 @@ public class AwsCognitoIdTokenProcessor {
 
     public Authentication getAuthentication(HttpServletRequest request) throws Exception {
 
-        String idToken = request.getHeader(jwtConfiguration.getHttpHeader());
+        String idToken = request.getParameter(jwtConfiguration.getTokenUrlParameter());
+        if (idToken == null) {
+            idToken = request.getHeader(jwtConfiguration.getHttpHeader());
+        } else {
+            jwtIdTokenCredentialsHolder.setTokenFromUrl(true);
+        }
         if (idToken != null) {
 
             JWTClaimsSet claimsSet = null;
@@ -79,7 +85,7 @@ public class AwsCognitoIdTokenProcessor {
 
             if (username != null) {
 
-                List<String> groups = (List<String>) claimsSet.getClaims().get(jwtConfiguration.getGroupsField());
+                List<String> groups = (List<String>) claimsSet.getClaims().getOrDefault(jwtConfiguration.getGroupsField(), Arrays.asList("USER"));
                 List<GrantedAuthority> grantedAuthorities = convertList(groups, group -> new SimpleGrantedAuthority(ROLE_PREFIX + group.toUpperCase()));
                 User user = new User(username, EMPTY_PWD, grantedAuthorities);
 

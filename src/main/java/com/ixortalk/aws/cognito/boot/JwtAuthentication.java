@@ -30,12 +30,11 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 /**
- *
  * Value object holding the principal, the JWT clailmset and the granted authorities.
  * This is the authentication object that will be made available in the security context.
- *
  */
 public class JwtAuthentication extends AbstractAuthenticationToken {
+    public static final String JWT_SOURCE_URL_ATTRIBUTE_NAME = "_jwtSource";
 
     private final Object principal;
     private JWTClaimsSet jwtClaimsSet;

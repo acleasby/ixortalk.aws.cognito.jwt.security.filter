@@ -43,6 +43,7 @@ public class JwtConfiguration {
     private int connectionTimeout = 2000;
     private int readTimeout = 2000;
     private String httpHeader = "Authorization";
+    private String tokenUrlParameter = "token";
 
     public String getJwkUrl() {
         if (jwkUrl==null || jwkUrl.isEmpty()) {
@@ -124,4 +125,11 @@ public class JwtConfiguration {
         this.readTimeout = readTimeout;
     }
 
+    public String getTokenUrlParameter() {
+        return tokenUrlParameter;
+    }
+
+    public void setTokenUrlParameter(String tokenUrlParameter) {
+        this.tokenUrlParameter = tokenUrlParameter;
+    }
 }

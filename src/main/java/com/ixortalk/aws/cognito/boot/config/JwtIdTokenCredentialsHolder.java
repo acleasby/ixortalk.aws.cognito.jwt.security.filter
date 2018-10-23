@@ -29,6 +29,7 @@ package com.ixortalk.aws.cognito.boot.config;
  *
  */
 public class JwtIdTokenCredentialsHolder {
+    private boolean tokenFromUrl;
 
     public String getIdToken() {
         return idToken;
@@ -37,6 +38,14 @@ public class JwtIdTokenCredentialsHolder {
     public JwtIdTokenCredentialsHolder setIdToken(String idToken) {
         this.idToken = idToken;
         return this;
+    }
+
+    public boolean isTokenFromUrl() {
+        return tokenFromUrl;
+    }
+
+    public void setTokenFromUrl(boolean tokenFromUrl) {
+        this.tokenFromUrl = tokenFromUrl;
     }
 
     private String idToken;
