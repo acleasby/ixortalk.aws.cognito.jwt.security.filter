@@ -26,11 +26,7 @@ package com.ixortalk.aws.cognito.boot.filter;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.ixortalk.aws.cognito.boot.config.JwtAutoConfiguration;
 import com.ixortalk.aws.cognito.boot.config.JwtIdTokenCredentialsHolder;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -60,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = JwtAutoConfiguration.class,initializers = ConfigFileApplicationContextInitializer.class)
+@ContextConfiguration(classes = JwtAutoConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class AwsCognitoIdTokenProcessorTest {
 
     private static final String KNOWN_KID = "1486832567";
@@ -94,13 +90,13 @@ public class AwsCognitoIdTokenProcessorTest {
 
     @Test(expected = ParseException.class)
     public void whenAuthorizationHeaderWithInvalidJWTValueProvidedParseExceptionOccurs() throws Exception {
-        request.addHeader("Authorization", "Invalid JWT");
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + "Invalid JWT");
         awsCognitoIdTokenProcessor.getAuthentication(request);
     }
 
     @Test(expected = ParseException.class)
     public void whenAuthorizationHeaderWithEmptyJWTValueProvidedParseExceptionOccurs() throws Exception {
-        request.addHeader("Authorization", "");
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + "");
         awsCognitoIdTokenProcessor.getAuthentication(request);
     }
 
@@ -111,30 +107,28 @@ public class AwsCognitoIdTokenProcessorTest {
 
     @Test(expected = ParseException.class)
     public void whenUnsignedAuthorizationHeaderProvidedParseExceptionOccurs() throws Exception {
-        request.addHeader("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMzNywidXNlcm5hbWUiOiJqb2huLmRvZSJ9");
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMzNywidXNlcm5hbWUiOiJqb2huLmRvZSJ9");
         assertThat(awsCognitoIdTokenProcessor.getAuthentication(request)).isNull();
     }
 
-
     @Test(expected = BadJOSEException.class)
     public void whenSignedJWTWithoutMatchingKeyInAuthorizationHeaderProvidedParseExceptionOccurs() throws Exception {
-        request.addHeader("Authorization", newJwtToken(UNKNOWN_KID,"role1").serialize());
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + newJwtToken(UNKNOWN_KID, "role1").serialize());
         assertThat(awsCognitoIdTokenProcessor.getAuthentication(request)).isNull();
     }
 
     @Test
     public void whenSignedJWTWithMatchingKeyInAuthorizationHeaderProvidedAuthenticationIsReturned() throws Exception {
-        request.addHeader("Authorization", newJwtToken(KNOWN_KID,"role1").serialize());
-        Authentication authentication =  awsCognitoIdTokenProcessor.getAuthentication(request);
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + newJwtToken(KNOWN_KID, "role1").serialize());
+        Authentication authentication = awsCognitoIdTokenProcessor.getAuthentication(request);
         assertThat(authentication.isAuthenticated()).isTrue();
     }
 
     @Test(expected = BadJWTException.class)
     public void whenExpiredJWTWithMatchingKeyInAuthorizationHeaderProvidedAuthenticationIsReturned() throws Exception {
-        request.addHeader("Authorization", newJwtToken(KNOWN_KID,"expired").serialize());
+        request.addHeader("Authorization", AwsCognitoIdTokenProcessor.BEARER_PREFIX + newJwtToken(KNOWN_KID, "expired").serialize());
         awsCognitoIdTokenProcessor.getAuthentication(request);
     }
-
 
     protected void setupJwkResource(String assetResponse) {
         wireMockRule.stubFor(get(urlEqualTo("/.well-known/jwks.json"))
@@ -145,7 +139,7 @@ public class AwsCognitoIdTokenProcessorTest {
                 ));
     }
 
-    private JWSObject newJwtToken(String kid,String role) throws Exception {
+    private JWSObject newJwtToken(String kid, String role) throws Exception {
 
         RSAKey rsaKey = RSAKey.parse(jsonFile("jwk/private_key.json"));
         JWSSigner signer = new RSASSASigner(rsaKey);

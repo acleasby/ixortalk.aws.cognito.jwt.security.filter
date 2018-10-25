@@ -48,7 +48,7 @@ public class AwsCognitoIdTokenProcessor {
 
     private static final String ROLE_PREFIX = "ROLE_";
     private static final String EMPTY_PWD = "";
-    private static final String BEARER_PREFIX = "Bearer ";
+    protected static final String BEARER_PREFIX = "Bearer ";
 
     @Autowired
     private JwtConfiguration jwtConfiguration;
@@ -63,15 +63,15 @@ public class AwsCognitoIdTokenProcessor {
 
         String idToken = request.getParameter(jwtConfiguration.getTokenUrlParameter());
         if (idToken == null) {
-            idToken = request.getHeader(jwtConfiguration.getHttpHeader());
+            idToken = getHeaderToken(request.getHeader(jwtConfiguration.getHttpHeader()));
         } else {
             jwtIdTokenCredentialsHolder.setTokenFromUrl(true);
         }
         if (idToken != null) {
 
-            JWTClaimsSet claimsSet = null;
+            JWTClaimsSet claimsSet;
 
-            claimsSet = configurableJWTProcessor.process(stripBearerToken(idToken), null);
+            claimsSet = configurableJWTProcessor.process(idToken, null);
 
             if (!isIssuedCorrectly(claimsSet)) {
                 throw new Exception(String.format("Issuer %s in JWT token doesn't match cognito idp %s", claimsSet.getIssuer(), jwtConfiguration.getCognitoIdentityPoolUrl()));
@@ -89,7 +89,7 @@ public class AwsCognitoIdTokenProcessor {
                 List<GrantedAuthority> grantedAuthorities = convertList(groups, group -> new SimpleGrantedAuthority(ROLE_PREFIX + group.toUpperCase()));
                 User user = new User(username, EMPTY_PWD, grantedAuthorities);
 
-                jwtIdTokenCredentialsHolder.setIdToken(stripBearerToken(idToken));
+                jwtIdTokenCredentialsHolder.setIdToken(idToken);
                 return new JwtAuthentication(user, claimsSet, grantedAuthorities);
             }
 
@@ -99,8 +99,12 @@ public class AwsCognitoIdTokenProcessor {
         return null;
     }
 
-    private String stripBearerToken(String token) {
-        return token.startsWith(BEARER_PREFIX) ? token.substring(BEARER_PREFIX.length()) : token;
+    private String getHeaderToken(String tokenHeader) {
+        if (tokenHeader != null && tokenHeader.startsWith(BEARER_PREFIX)) {
+            return tokenHeader.substring(BEARER_PREFIX.length());
+        } else {
+            return null;
+        }
     }
 
     private boolean isIssuedCorrectly(JWTClaimsSet claimsSet) {
