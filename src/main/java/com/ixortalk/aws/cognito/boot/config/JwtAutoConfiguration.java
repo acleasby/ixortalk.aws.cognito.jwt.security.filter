@@ -63,12 +63,6 @@ import static com.nimbusds.jose.JWSAlgorithm.RS256;
 public class JwtAutoConfiguration {
 
     @Bean
-    @Scope(value="request", proxyMode= ScopedProxyMode.TARGET_CLASS)
-    public JwtIdTokenCredentialsHolder awsCognitoCredentialsHolder() {
-        return new JwtIdTokenCredentialsHolder();
-    }
-
-    @Bean
     public AwsCognitoIdTokenProcessor awsCognitoIdTokenProcessor() { return new AwsCognitoIdTokenProcessor(); }
 
     @Bean

@@ -25,7 +25,6 @@ package com.ixortalk.aws.cognito.boot.filter;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.ixortalk.aws.cognito.boot.config.JwtAutoConfiguration;
-import com.ixortalk.aws.cognito.boot.config.JwtIdTokenCredentialsHolder;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -68,9 +67,6 @@ public class AwsCognitoIdTokenProcessorTest {
 
     @Autowired
     private AwsCognitoIdTokenProcessor awsCognitoIdTokenProcessor;
-
-    @Autowired
-    private JwtIdTokenCredentialsHolder jwtIdTokenCredentialsHolder;
 
     private MockHttpServletRequest request = new MockHttpServletRequest();
 

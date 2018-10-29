@@ -25,7 +25,6 @@ package com.ixortalk.aws.cognito.boot.filter;
 
 import com.ixortalk.aws.cognito.boot.JwtAuthentication;
 import com.ixortalk.aws.cognito.boot.config.JwtConfiguration;
-import com.ixortalk.aws.cognito.boot.config.JwtIdTokenCredentialsHolder;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import org.apache.commons.logging.Log;
@@ -56,16 +55,14 @@ public class AwsCognitoIdTokenProcessor {
     @Autowired
     private ConfigurableJWTProcessor configurableJWTProcessor;
 
-    @Autowired
-    private JwtIdTokenCredentialsHolder jwtIdTokenCredentialsHolder;
-
     public Authentication getAuthentication(HttpServletRequest request) throws Exception {
 
+        boolean tokenFromUrl = false;
         String idToken = request.getParameter(jwtConfiguration.getTokenUrlParameter());
         if (idToken == null) {
             idToken = getHeaderToken(request.getHeader(jwtConfiguration.getHttpHeader()));
         } else {
-            jwtIdTokenCredentialsHolder.setTokenFromUrl(true);
+            tokenFromUrl = true;
         }
         if (idToken != null) {
 
@@ -89,8 +86,7 @@ public class AwsCognitoIdTokenProcessor {
                 List<GrantedAuthority> grantedAuthorities = convertList(groups, group -> new SimpleGrantedAuthority(ROLE_PREFIX + group.toUpperCase()));
                 User user = new User(username, EMPTY_PWD, grantedAuthorities);
 
-                jwtIdTokenCredentialsHolder.setIdToken(idToken);
-                return new JwtAuthentication(user, claimsSet, grantedAuthorities);
+                return new JwtAuthentication(user, claimsSet, grantedAuthorities, tokenFromUrl);
             }
 
         }

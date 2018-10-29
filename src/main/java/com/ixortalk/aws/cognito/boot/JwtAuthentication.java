@@ -38,11 +38,13 @@ public class JwtAuthentication extends AbstractAuthenticationToken {
 
     private final Object principal;
     private JWTClaimsSet jwtClaimsSet;
+    private final boolean tokenFromUrl;
 
-    public JwtAuthentication(Object principal, JWTClaimsSet jwtClaimsSet, Collection<? extends GrantedAuthority> authorities) {
+    public JwtAuthentication(Object principal, JWTClaimsSet jwtClaimsSet, Collection<? extends GrantedAuthority> authorities, boolean tokenFromUrl) {
         super(authorities);
         this.principal = principal;
         this.jwtClaimsSet = jwtClaimsSet;
+        this.tokenFromUrl = tokenFromUrl;
         super.setAuthenticated(true);
     }
 
@@ -58,5 +60,9 @@ public class JwtAuthentication extends AbstractAuthenticationToken {
 
     public JWTClaimsSet getJwtClaimsSet() {
         return jwtClaimsSet;
+    }
+
+    public boolean isTokenFromUrl() {
+        return tokenFromUrl;
     }
 }
